@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #canvas {
+      border: 1px solid black;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .input-group label {
+      margin-right: 5px;
+    }
+
+    .input-group input {
+      width: 60px;
+    }
+
+    #start-btn {
+      margin-left: 5px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="input-group">
+    <label for="shoulder-min">Shoulder Min:</label>
+    <input type="number" id="shoulder-min" value="-180" />
+    <label for="shoulder-max">Max:</label>
+    <input type="number" id="shoulder-max" value="0" />
+  </div>
+  <div class="input-group">
+    <label for="forearm-min">Forearm Min:</label>
+    <input type="number" id="forearm-min" value="-135" />
+    <label for="forearm-max">Max:</label>
+    <input type="number" id="forearm-max" value="135" />
+  </div>
+  <div>
+    <button id="start-btn">Start</button>
+  </div>
+  <canvas id="canvas" width="400" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    const shoulderMinInput = document.getElementById('shoulder-min');
+    const shoulderMaxInput = document.getElementById('shoulder-max');
+    const forearmMinInput = document.getElementById('forearm-min');
+    const forearmMaxInput = document.getElementById('forearm-max');
+    const startButton = document.getElementById('start-btn');
+
+    let shoulderRange = { min: parseInt(shoulderMinInput.value), max: parseInt(shoulderMaxInput.value) };
+    let forearmRange = { min: parseInt(forearmMinInput.value), max: parseInt(forearmMaxInput.value) };
+
+    const forearmLength = 80;
+    const elbowLength = 80;
+    const shoulderX = canvas.width / 2;
+    const shoulderY = canvas.height / 2;
+
+    let forearmX, forearmY;
+    let elbowX, elbowY;
+
+    let shoulderAngle = shoulderRange.min;
+    let forearmAngle = forearmRange.min;
+
+    const redPoints = []; // Array to store red point positions
+
+    function startLoop() {
+      shoulderRange = { min: parseInt(shoulderMinInput.value), max: parseInt(shoulderMaxInput.value) };
+      forearmRange = { min: parseInt(forearmMinInput.value), max: parseInt(forearmMaxInput.value) };
+
+      shoulderAngle = shoulderRange.min;
+      forearmAngle = forearmRange.min;
+
+      redPoints.length = 0; // Clear the red points array
+
+      iterate();
+    }
+
+    function iterate() {
+      forearmX = shoulderX + forearmLength * Math.cos((shoulderAngle * Math.PI) / 180);
+      forearmY = shoulderY + forearmLength * Math.sin((shoulderAngle * Math.PI) / 180);
+
+      elbowX = forearmX + elbowLength * Math.cos(((shoulderAngle + forearmAngle) * Math.PI) / 180);
+      elbowY = forearmY + elbowLength * Math.sin(((shoulderAngle + forearmAngle) * Math.PI) / 180);
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      drawArm();
+      drawPoints();
+
+      // Store the position of the red point
+      redPoints.push({ x: elbowX, y: elbowY });
+
+      forearmAngle += 10;
+      if (forearmAngle > forearmRange.max) {
+        forearmAngle = forearmRange.min;
+        shoulderAngle += 10;
+        if (shoulderAngle > shoulderRange.max) {
+          return;
+        }
+      }
+
+      setTimeout(iterate, 10); // Delay between each iteration
+    }
+
+    function drawArm() {
+      context.beginPath();
+      context.moveTo(shoulderX, shoulderY);
+      context.lineTo(forearmX, forearmY);
+      context.lineTo(elbowX, elbowY);
+      context.lineWidth = 5;
+      context.strokeStyle = 'black';
+      context.stroke();
+    }
+
+    function drawPoints() {
+      for (const point of redPoints) {
+        drawPoint(point.x, point.y, 'red');
+      }
+    }
+
+    function drawPoint(x, y, color) {
+      context.beginPath();
+      context.arc(x, y, 3, 0, Math.PI * 2);
+      context.fillStyle = color;
+      context.fill();
+    }
+
+    startButton.addEventListener('click', startLoop);
+  </script>
+</body>
+</html>
