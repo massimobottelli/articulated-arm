@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <label for="shoulder-slider">Shoulder Angle:</label>
+    <input type="range" id="shoulder-slider" min="-180" max="0" value="-90" />
+  </div>
+  <div>
+    <label for="forearm-slider">Forearm Angle:</label>
+    <input type="range" id="forearm-slider" min="-90" max="90" value="0" />
+  </div>
+  <canvas id="canvas" width="400" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    const shoulderSlider = document.getElementById('shoulder-slider');
+    const forearmSlider = document.getElementById('forearm-slider');
+
+    let shoulderAngle = parseInt(shoulderSlider.value);
+    let forearmAngle = parseInt(forearmSlider.value);
+
+    function drawArm() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      const shoulderX = canvas.width / 2;
+      const shoulderY = canvas.height / 2;
+
+      const forearmLength = 100;
+      const forearmX = shoulderX + forearmLength * Math.cos((shoulderAngle * Math.PI) / 180);
+      const forearmY = shoulderY + forearmLength * Math.sin((shoulderAngle * Math.PI) / 180);
+
+      const elbowLength = 80;
+      const elbowX = forearmX + elbowLength * Math.cos(((shoulderAngle + forearmAngle) * Math.PI) / 180);
+      const elbowY = forearmY + elbowLength * Math.sin(((shoulderAngle + forearmAngle) * Math.PI) / 180);
+
+      context.beginPath();
+      context.moveTo(shoulderX, shoulderY);
+      context.lineTo(forearmX, forearmY);
+      context.lineTo(elbowX, elbowY);
+      context.lineWidth = 5;
+      context.strokeStyle = 'black';
+      context.stroke();
+    }
+
+    shoulderSlider.addEventListener('input', function (event) {
+      shoulderAngle = parseInt(event.target.value);
+      drawArm();
+    });
+
+    forearmSlider.addEventListener('input', function (event) {
+      forearmAngle = parseInt(event.target.value);
+      drawArm();
+    });
+
+    drawArm();
+  </script>
+</body>
+</html>
