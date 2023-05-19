@@ -1,6 +1,6 @@
 # Articulated Arm
 
-This is a JavaScript script that graphically displays an articulated arm with adjustable angles using sliders. 
+This JavaScript script graphically displays an articulated arm with adjustable angles using sliders. 
 
 Users can control the shoulder and forearm angles using sliders and visualize the arm's movement in real-time.
 
