@@ -13,9 +13,3 @@ This is a JavaScript project that graphically displays an articulated arm with a
 
 You can see a live demo of the project [here](https://your-demo-link.com).
 
-## Installation
-
-1. Clone the repository:
-
-   ```shell
-   git clone https://github.com/your-username/your-repository.git
