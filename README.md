@@ -1,4 +1,4 @@
-# Articulated Arm Graph
+# Articulated Arm
 
 This is a JavaScript script that graphically displays an articulated arm with adjustable angles using sliders. 
 
