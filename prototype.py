@@ -75,12 +75,22 @@ def draw_lines(x1, y1, x2, y2):
 
 def find_angles(x1, y1, x2, y2):
     # Calculate angles between lines
-    angle_origin_to_intersect1 = calculate_angle(origin_x, origin_y, x1, y1)
-    angle_intersect1_to_mouse = calculate_angle(x1, y1, x2, y2)
+    angle_origin_to_intersect = calculate_angle(origin_x, origin_y, x1, y1)
+    angle_intersect_to_target = calculate_angle(x1, y1, x2, y2)
 
+    relative_angle = 90 + angle_intersect_to_target - angle_origin_to_intersect if angle_origin_to_intersect < angle_intersect_to_target else  180 + angle_intersect_to_target - angle_origin_to_intersect
+    
     # Display angles near the respective lines
-    display_angle(angle_origin_to_intersect1, (origin_x + x1) // 2, (origin_y + y1) // 2)
-    display_angle(angle_intersect1_to_mouse, (x1 + x2) // 2, (y1 + y2) // 2)
+    display_angle(angle_origin_to_intersect, (origin_x + x1) // 2, (origin_y + y1) // 2)
+    display_angle(relative_angle, (x1 + x2) // 2, (y1 + y2) // 2)
+
+    return int(angle_origin_to_intersect), int(relative_angle)
+
+
+def calculate_angle(x1, y1, x2, y2):
+    delta_x = x2 - x1
+    delta_y = y2 - y1
+    return math.degrees(math.atan2(delta_y, delta_x))
 
 
 def display_angle(angle, label_x, label_y):
@@ -97,12 +107,6 @@ def display_coords(x, y, label_x, label_y):
     text_rect = text_surface.get_rect()
     text_rect.topleft = (label_x, label_y)
     board.blit(text_surface, text_rect)
-
-
-def calculate_angle(x1, y1, x2, y2):
-    delta_x = x2 - x1
-    delta_y = y2 - y1
-    return math.degrees(math.atan2(delta_y, delta_x))
 
 
 draw_origin()
@@ -133,7 +137,6 @@ while running:
                 if distance <= arm_1_length + arm_2_length:
 
                     # Find intersections
-
                     intersect_x1, intersect_y1, intersect_x2, intersect_y2 = find_intersection(target_x, target_y)
 
                     # Display the coordinates of the points of intersection on the board
@@ -145,9 +148,14 @@ while running:
                     draw_lines(intersect_x2, intersect_y2, target_x, target_y)
 
                     # Calculate and display angles between lines
-                    find_angles(intersect_x1, intersect_y1, target_x, target_y)
-                    find_angles(intersect_x2, intersect_y2, target_x, target_y)
+                    angle_origin_to_intersect_1, relative_angle_1 = find_angles(intersect_x1, intersect_y1, target_x, target_y)
+                    angle_origin_to_intersect_2, relative_angle_2 = find_angles(intersect_x2, intersect_y2, target_x, target_y)
 
+                    # Output to console
+                    print (angle_origin_to_intersect_1, relative_angle_1)
+                    print (angle_origin_to_intersect_2, relative_angle_2)
+                    print()
+                    
     # Update the display
     pygame.display.flip()
 
