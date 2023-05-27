@@ -76,22 +76,20 @@ def move_arm(start_1, end_1, start_2, end_2, pen_status):
 if __name__ == '__main__':
 
     angles = [
-        (90, 130), (90, 30), UP,
-        (130, 90), (30, 90), DOWN,
-        (90, 30), (90, 190), UP,
-        (30, 90), (190, 90), DOWN,
+        [(90, 130), (90, 30), UP],
+        [(130, 90), (30, 90), DOWN],
+        [(90, 30), (90, 190), UP],
+        [(30, 90), (190, 90), DOWN],
     ]
 
-    # Iterate over the array two by two
-    for i in range(0, len(angles), 3):
-        angle1 = angles[i]
-        angle2 = angles[i + 1]
-        pos = angles[i + 2]
+    for i in range(0, len(angles)):
 
-        start_angle_1, end_angle_1 = angle1
-        start_angle_2, end_angle_2 = angle2
+        # explode sublist and tuples
+        motor_1_angles, motor_2_angles, pen_position = angles[i]
+        motor_1_start_angle, motor_1_end_angle = motor_1_angles
+        motor_2_start_angle, motor_2_end_angle = motor_2_angles
 
-        move_arm(start_angle_1, end_angle_1, start_angle_2, end_angle_2, pos)
+        move_arm(motor_1_start_angle, motor_1_end_angle, motor_2_start_angle, motor_2_end_angle, pen_position)
 
     GPIO.cleanup()
 
