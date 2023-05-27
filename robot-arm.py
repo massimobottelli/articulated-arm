@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 import threading
+import sys
 
 MOTOR_1 = 12
 MOTOR_2 = 13
@@ -48,7 +49,7 @@ def pen(direction):
     move_servo(motor_pin, start_angle, end_angle, 10)
 
 
-def move_arm(start_1, end_1, start_2, end_2, pen_status):
+def move_arm(start_1, start_2, end_1, end_2, pen_status):
     # Move pen
     pen(pen_status)
     time.sleep(0.5)
@@ -75,7 +76,7 @@ def move_arm(start_1, end_1, start_2, end_2, pen_status):
 
 if __name__ == '__main__':
 
-    angles = [
+    '''angles = [
         [(90, 130), (90, 30), UP],
         [(130, 90), (30, 90), DOWN],
         [(90, 30), (90, 190), UP],
@@ -86,10 +87,40 @@ if __name__ == '__main__':
 
         # explode sublist and tuples
         motor_1_angles, motor_2_angles, pen_position = angles[i]
-        motor_1_start_angle, motor_1_end_angle = motor_1_angles
-        motor_2_start_angle, motor_2_end_angle = motor_2_angles
 
-        move_arm(motor_1_start_angle, motor_1_end_angle, motor_2_start_angle, motor_2_end_angle, pen_position)
+        motor_1_start_angle, motor_1_end_angle = motor_1_angles
+        motor_2_start_angle, motor_2_end_angle = motor_2_angles'''
+
+    # Check if the correct number of arguments is provided
+    if len(sys.argv) != 6:
+        print("Error: Invalid number of arguments.")
+        print(
+            "Usage: python robot-arm.py <motor_1_start_angle> <motor_2_start_angle> <motor_1_end_angle> "
+            "<motor_2_end_angle> <pen_position_flag>")
+        sys.exit(1)
+
+    # Access command-line arguments
+    motor_1_start_angle = int(sys.argv[1])
+    motor_2_start_angle = int(sys.argv[2])
+    motor_1_end_angle = int(sys.argv[3])
+    motor_2_end_angle = int(sys.argv[4])
+    pen_position_flag = int(sys.argv[5])
+
+    # Validate the pen position flag
+    if pen_position_flag == 0:
+        pen_position = "UP"
+    elif pen_position_flag == 1:
+        pen_position = "DOWN"
+    else:
+        print("Error: Invalid pen position flag.")
+        sys.exit(1)
+
+    # Move to target position
+    move_arm(motor_1_start_angle, motor_2_start_angle, motor_1_end_angle, motor_2_end_angle, pen_position)
+
+    time.sleep(1)
+
+    # Return to neutral position
+    move_arm(motor_1_end_angle, motor_2_end_angle, motor_1_start_angle, motor_2_start_angle, pen_position)
 
     GPIO.cleanup()
-
