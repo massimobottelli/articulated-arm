@@ -1,3 +1,3 @@
 # Robot Arm
 
-![Robot Arm](public/img/capture-01.jpeg)
+![Robot Arm](public/img/capture-02.jpeg)
