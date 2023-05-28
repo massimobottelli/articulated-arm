@@ -1,29 +1,19 @@
 import pygame
 import math
+import paho.mqtt.client as mqtt
+import config
 
-# Initialize Pygame
-pygame.init()
-
-# Define the dimensions of the board
-board_width = 500
-board_height = 250
-
-# Define the origin coordinates
-origin_x = 250
-origin_y = 10
-
-# Define arms length
-arm_1_length = 94
-arm_2_length = 104
-
-# Create the white board surface
-board = pygame.display.set_mode((board_width, board_height))
-pygame.display.set_caption("Robotic Arm Simulation")
-
-board.fill((255, 255, 255))  # Fill the board with white
-
-# Define the font for displaying coordinates
-font = pygame.font.Font(None, 20)
+# Access the constants from the config module
+board_width = config.board_width
+board_height = config.board_height
+origin_x = config.origin_x
+origin_y = config.origin_y
+arm_1_length = config.arm_1_length
+arm_2_length = config.arm_2_length
+broker_ip = config.broker_ip
+topic = config.topic
+username = config.username
+password = config.password
 
 
 def draw_origin():
@@ -112,7 +102,44 @@ def display_coords(x, y, label_x, label_y):
     board.blit(text_surface, text_rect)
 
 
-# Initialize the window
+def select_angles(angle1, angle2):
+    diff_1 = abs(angle1[0] - 90) + abs(angle2[0] - 90)
+    diff_2 = abs(angle1[1] - 90) + abs(angle2[1] - 90)
+
+    if diff_1 > diff_2:
+        selected_angle_1 = angle1[0]
+        selected_angle_2 = angle2[0]
+    else:
+        selected_angle_1 = angle1[1]
+        selected_angle_2 = angle2[1]
+
+    return selected_angle_1, selected_angle_2
+
+
+def publish_mqtt(angle1, angle2):
+    try:
+        # Publish data over MQTT
+        client = mqtt.Client()
+        client.username_pw_set(username, password)
+        client.connect(broker_ip)
+        message = str(angle1) + "," + str(angle2)
+        client.publish(topic, message)
+        client.disconnect()
+        return True
+    except Exception as e:
+        # Handle exceptions
+        print("Error:", e)
+        return False
+
+
+# Initialize Pygame
+pygame.init()
+board = pygame.display.set_mode((board_width, board_height))
+pygame.display.set_caption("Robotic Arm Simulation")
+board.fill((255, 255, 255))  # Fill the board with white
+font = pygame.font.Font(None, 20)
+
+# Initialize window
 draw_origin()
 pygame.display.flip()
 
@@ -159,22 +186,14 @@ while running:
                     angle_1[0], angle_2[0] = find_angles(intersect_x1, intersect_y1, target_x, target_y)
                     angle_1[1], angle_2[1] = find_angles(intersect_x2, intersect_y2, target_x, target_y)
 
-                    # Calculate the absolute differences from 90 degrees
-                    diff_1 = abs(angle_1[0] - 90) + abs(angle_2[0] - 90)
-                    diff_2 = abs(angle_1[1] - 90) + abs(angle_2[1] - 90)
-
-                    # Select and exclude the pair of value less close to 90
-                    if diff_1 > diff_2:
-                        selected_angle_origin_to_intersect = angle_1[0]
-                        selected_angle_to_target_relative = angle_2[0]
-                    else:
-                        selected_angle_origin_to_intersect = angle_1[1]
-                        selected_angle_to_target_relative = angle_2[1]
+                    # Select the pair of angles more distant to 90
+                    final_angle_1, final_angle_2 = select_angles(angle_1, angle_2)
 
                     # Print the selected pair
-                    print("Angle 1:", selected_angle_origin_to_intersect)
-                    print("Angle 2:", selected_angle_to_target_relative)
-                    print()
+                    print("Angles:", final_angle_1, final_angle_2, "\n")
+
+                    # Publish data over MQTT
+                    publish_mqtt(final_angle_1, final_angle_2)
 
     # Update the display
     pygame.display.flip()
