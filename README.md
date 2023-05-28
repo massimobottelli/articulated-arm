@@ -1,3 +1,3 @@
 # Robot Arm
 
-![Articulated Arm Prototype](public/img/robot-arm-prototype.png)
+![Robot Arm](public/img/capture-01.jpeg)
