@@ -116,13 +116,13 @@ def select_angles(angle1, angle2):
     return selected_angle_1, selected_angle_2, selected_intersect_x, selected_intersect_y
 
 
-def publish_mqtt(angle1, angle2):
+def publish_mqtt(angle1, angle2, pen):
     try:
         # Publish data over MQTT
         client = mqtt.Client()
         client.username_pw_set(username, password)
         client.connect(broker_ip)
-        message = str(angle1) + "," + str(angle2)
+        message = str(angle1) + "," + str(angle2) + "," + str(pen)
         client.publish(topic, message)
         client.disconnect()
         return True
@@ -198,9 +198,12 @@ while running:
                     # Print the selected pair
                     print("Angles:", final_angle_1, final_angle_2)
 
+                    # Pen position
+                    pen_position_flag = 1 # <-- to be updated
+
                     # Publish data over MQTT
                     if final_angle_1 > 0:
-                        publish_mqtt(final_angle_1, final_angle_2)
+                        publish_mqtt(final_angle_1, final_angle_2, pen_position_flag)
 
     # Update the display
     pygame.display.flip()

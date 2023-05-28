@@ -2,6 +2,14 @@ import RPi.GPIO as GPIO
 import time
 import threading
 import sys
+import paho.mqtt.client as mqtt
+import config
+
+# Access the constants from the config module
+broker_ip = config.broker_ip
+topic = config.topic
+username = config.username
+password = config.password
 
 MOTOR_1 = 12
 MOTOR_2 = 13
@@ -75,55 +83,61 @@ def move_arm(start_1, start_2, end_1, end_2, pen_status):
 # Main
 
 if __name__ == '__main__':
+    # Receive the angles via MQTT listener
 
-    '''angles = [
-        [(90, 130), (90, 30), UP],
-        [(130, 90), (30, 90), DOWN],
-        [(90, 30), (90, 190), UP],
-        [(30, 90), (190, 90), DOWN],
-    ]
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT broker")
+            client.subscribe(topic)
+        else:
+            print("Connection failed. RC:", rc)
 
-    for i in range(0, len(angles)):
 
-        # explode sublist and tuples
-        motor_1_angles, motor_2_angles, pen_position = angles[i]
+    def on_message(client, userdata, msg):
+        angle1, angle2, pen_position_flag = map(int, msg.payload.decode().split(","))
+        print("Angles:", angle1, angle2)
+        print("Pen:", pen_position_flag)
 
-        motor_1_start_angle, motor_1_end_angle = motor_1_angles
-        motor_2_start_angle, motor_2_end_angle = motor_2_angles'''
+        # Move motors to received angles
+        motor_1_start_angle = 90
+        motor_2_start_angle = 90
 
-    # Check if the correct number of arguments is provided
-    if len(sys.argv) != 4:
-        print("Error: Invalid number of arguments.")
-        print(
-            "Usage: python robot-arm.py <motor_1_end_angle> <motor_2_end_angle> <pen_position_flag>")
-        sys.exit(1)
+        motor_1_end_angle = 180 - angle1
+        motor_2_end_angle = 180 - angle2
 
-    # Access command-line arguments
-    motor_1_start_angle = 90 # Neutral position
-    motor_2_start_angle = 90 # Neutral position
-    motor_1_end_angle = 180 - int(sys.argv[1])
-    motor_2_end_angle = 180 - int(sys.argv[2])
-    pen_position_flag = int(sys.argv[3])
+        # Validate the pen position flag
+        if pen_position_flag == 0:
+            pen_position = UP
+        elif pen_position_flag == 1:
+            pen_position = DOWN
+        else:
+            print("Error: Invalid pen position flag.")
+            sys.exit(1)
 
-    # Validate the pen position flag
-    if pen_position_flag == 0:
-        pen_position = UP
-    elif pen_position_flag == 1:
-        pen_position = DOWN
-    else:
-        print("Error: Invalid pen position flag.")
-        sys.exit(1)
+        # Move to target position
+        move_arm(motor_1_start_angle, motor_2_start_angle, motor_1_end_angle, motor_2_end_angle, pen_position)
 
-    # Move to target position
-    move_arm(motor_1_start_angle, motor_2_start_angle, motor_1_end_angle, motor_2_end_angle, pen_position)
+        # Revert pen position
+        if pen_position_flag == 0:
+            pen_position = DOWN
+        else:
+            pen_position = UP
 
-    # Revert pen position
-    if pen_position_flag == 0:
-        pen_position = DOWN
-    else:
-        pen_position = UP
+        # Return to neutral position
+        move_arm(motor_1_end_angle, motor_2_end_angle, motor_1_start_angle, motor_2_start_angle, pen_position)
 
-    # Return to neutral position
-    move_arm(motor_1_end_angle, motor_2_end_angle, motor_1_start_angle, motor_2_start_angle, pen_position)
+        GPIO.cleanup()
 
-    GPIO.cleanup()
+
+    # ------------------------------
+
+    client = mqtt.Client()
+    client.username_pw_set(username, password)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(broker_ip)
+    client.loop_forever()
+
+    # ------------------------------
+
+
