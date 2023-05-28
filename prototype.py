@@ -72,10 +72,6 @@ def find_angles(x1, y1, x2, y2):
         relative_angle = 90 + angle_intersect_to_target - angle_origin_to_intersect
     else:
         relative_angle = 90 + angle_intersect_to_target - angle_origin_to_intersect
-    
-    # Display angles near the respective lines
-    display_angle(angle_origin_to_intersect, (origin_x + x1) // 2, (origin_y + y1) // 2)
-    display_angle(relative_angle, (x1 + x2) // 2, (y1 + y2) // 2)
 
     return int(angle_origin_to_intersect), int(relative_angle)
 
@@ -109,11 +105,15 @@ def select_angles(angle1, angle2):
     if diff_1 > diff_2:
         selected_angle_1 = angle1[0]
         selected_angle_2 = angle2[0]
+        selected_intersect_x = intersect_x1
+        selected_intersect_y = intersect_y1
     else:
         selected_angle_1 = angle1[1]
         selected_angle_2 = angle2[1]
+        selected_intersect_x = intersect_x2
+        selected_intersect_y = intersect_y2
 
-    return selected_angle_1, selected_angle_2
+    return selected_angle_1, selected_angle_2, selected_intersect_x, selected_intersect_y
 
 
 def publish_mqtt(angle1, angle2):
@@ -178,22 +178,29 @@ while running:
                     display_coords(int(intersect_x1), int(intersect_y1), int(intersect_x1)+10, int(intersect_y1)-10)
                     display_coords(int(intersect_x2), int(intersect_y2), int(intersect_x2)+10, int(intersect_y2)-10)
 
-                    # Draw lines from origin to intersection points and from there to the target point
-                    draw_lines(intersect_x1, intersect_y1, target_x, target_y)
-                    draw_lines(intersect_x2, intersect_y2, target_x, target_y)
-
-                    # Calculate and display angles between lines
+                    # Calculate angles between lines
                     angle_1[0], angle_2[0] = find_angles(intersect_x1, intersect_y1, target_x, target_y)
                     angle_1[1], angle_2[1] = find_angles(intersect_x2, intersect_y2, target_x, target_y)
 
                     # Select the pair of angles more distant to 90
-                    final_angle_1, final_angle_2 = select_angles(angle_1, angle_2)
+                    final_angle_1, final_angle_2, selected_intercept_x, selected_intercept_y =\
+                        select_angles(angle_1, angle_2)
+
+                    # Draw line from origin to selected interception and to target
+                    draw_lines(selected_intercept_x, selected_intercept_y, target_x, target_y)
+
+                    # Display selected angles
+                    display_angle(final_angle_1, (origin_x + selected_intercept_x) // 2,
+                                  (origin_y + selected_intercept_y) // 2)
+                    display_angle(final_angle_2, (selected_intercept_x + target_x) // 2,
+                                  (selected_intercept_y + target_y) // 2)
 
                     # Print the selected pair
-                    print("Angles:", final_angle_1, final_angle_2, "\n")
+                    print("Angles:", final_angle_1, final_angle_2)
 
                     # Publish data over MQTT
-                    publish_mqtt(final_angle_1, final_angle_2)
+                    if final_angle_1 > 0:
+                        publish_mqtt(final_angle_1, final_angle_2)
 
     # Update the display
     pygame.display.flip()
