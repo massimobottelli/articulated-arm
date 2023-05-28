@@ -92,25 +92,24 @@ if __name__ == '__main__':
         motor_2_start_angle, motor_2_end_angle = motor_2_angles'''
 
     # Check if the correct number of arguments is provided
-    if len(sys.argv) != 6:
+    if len(sys.argv) != 4:
         print("Error: Invalid number of arguments.")
         print(
-            "Usage: python robot-arm.py <motor_1_start_angle> <motor_2_start_angle> <motor_1_end_angle> "
-            "<motor_2_end_angle> <pen_position_flag>")
+            "Usage: python robot-arm.py <motor_1_end_angle> <motor_2_end_angle> <pen_position_flag>")
         sys.exit(1)
 
     # Access command-line arguments
-    motor_1_start_angle = int(sys.argv[1])
-    motor_2_start_angle = int(sys.argv[2])
-    motor_1_end_angle = int(sys.argv[3])
-    motor_2_end_angle = int(sys.argv[4])
-    pen_position_flag = int(sys.argv[5])
+    motor_1_start_angle = 90 # Neutral position
+    motor_2_start_angle = 90 # Neutral position
+    motor_1_end_angle = 180 - int(sys.argv[1])
+    motor_2_end_angle = 180 - int(sys.argv[2])
+    pen_position_flag = int(sys.argv[3])
 
     # Validate the pen position flag
     if pen_position_flag == 0:
-        pen_position = "UP"
+        pen_position = UP
     elif pen_position_flag == 1:
-        pen_position = "DOWN"
+        pen_position = DOWN
     else:
         print("Error: Invalid pen position flag.")
         sys.exit(1)
@@ -118,7 +117,11 @@ if __name__ == '__main__':
     # Move to target position
     move_arm(motor_1_start_angle, motor_2_start_angle, motor_1_end_angle, motor_2_end_angle, pen_position)
 
-    time.sleep(1)
+    # Revert pen position
+    if pen_position_flag == 0:
+        pen_position = DOWN
+    else:
+        pen_position = UP
 
     # Return to neutral position
     move_arm(motor_1_end_angle, motor_2_end_angle, motor_1_start_angle, motor_2_start_angle, pen_position)
