@@ -13,8 +13,8 @@ origin_x = 250
 origin_y = 10
 
 # Define arms length
-arm_1_length = 93
-arm_2_length = 140
+arm_1_length = 94
+arm_2_length = 104
 
 # Create the white board surface
 board = pygame.display.set_mode((board_width, board_height))
@@ -50,21 +50,21 @@ def get_target():
     return x, y
 
 
-def find_intersection(target_x, target_y):
-    dx = target_x - origin_x
-    dy = target_y - origin_y
+def find_intersection(x, y):
+    dx = x - origin_x
+    dy = y - origin_y
     d = (arm_1_length ** 2 - arm_2_length ** 2 + distance ** 2) / (2 * distance)
     h = (arm_1_length ** 2 - d ** 2) ** 0.5
-    intersect_x1 = origin_x + (d * dx - h * dy) / distance
-    intersect_y1 = origin_y + (h * dx + d * dy) / distance
-    intersect_x2 = origin_x + (d * dx + h * dy) / distance
-    intersect_y2 = origin_y + (-h * dx + d * dy) / distance
+    x1 = origin_x + (d * dx - h * dy) / distance
+    y1 = origin_y + (h * dx + d * dy) / distance
+    x2 = origin_x + (d * dx + h * dy) / distance
+    y2 = origin_y + (-h * dx + d * dy) / distance
 
     # Draw the points of intersection
-    pygame.draw.circle(board, (255, 0, 0), (int(intersect_x1), int(intersect_y1)), 3)
-    pygame.draw.circle(board, (255, 0, 0), (int(intersect_x2), int(intersect_y2)), 3)
+    pygame.draw.circle(board, (255, 0, 0), (int(x1), int(y1)), 3)
+    pygame.draw.circle(board, (255, 0, 0), (int(x2), int(y2)), 3)
 
-    return intersect_x1, intersect_y1, intersect_x2, intersect_y2
+    return x1, y1, x2, y2
 
 
 def draw_lines(x1, y1, x2, y2):
@@ -78,7 +78,10 @@ def find_angles(x1, y1, x2, y2):
     angle_origin_to_intersect = calculate_angle(origin_x, origin_y, x1, y1)
     angle_intersect_to_target = calculate_angle(x1, y1, x2, y2)
 
-    relative_angle = 90 + angle_intersect_to_target - angle_origin_to_intersect if angle_origin_to_intersect < angle_intersect_to_target else  180 + angle_intersect_to_target - angle_origin_to_intersect
+    if angle_origin_to_intersect < angle_intersect_to_target:
+        relative_angle = 90 + angle_intersect_to_target - angle_origin_to_intersect
+    else:
+        relative_angle = 90 + angle_intersect_to_target - angle_origin_to_intersect
     
     # Display angles near the respective lines
     display_angle(angle_origin_to_intersect, (origin_x + x1) // 2, (origin_y + y1) // 2)
@@ -109,14 +112,20 @@ def display_coords(x, y, label_x, label_y):
     board.blit(text_surface, text_rect)
 
 
+# Initialize the window
 draw_origin()
-
-# Update the display
 pygame.display.flip()
 
-# Main game loop
+# Main loop
 running = True
 while running:
+
+    # Initialize variables
+    angle_1 = [0, 0]
+    angle_2 = [0, 0]
+    intersect_1 = [0, 0]
+    intersect_2 = [0, 0]
+
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -128,12 +137,11 @@ while running:
             if event.button == 1:  # Left mouse button
                 draw_origin()
 
+                # Get target point from user
                 target_x, target_y = get_target()
 
-                # Find the points of intersection between the two circles
+                # Find the position of elbow
                 distance = ((target_x - origin_x) ** 2 + (target_y - origin_y) ** 2) ** 0.5
-
-                # Check if the circles intersect
                 if distance <= arm_1_length + arm_2_length:
 
                     # Find intersections
@@ -143,19 +151,31 @@ while running:
                     display_coords(int(intersect_x1), int(intersect_y1), int(intersect_x1)+10, int(intersect_y1)-10)
                     display_coords(int(intersect_x2), int(intersect_y2), int(intersect_x2)+10, int(intersect_y2)-10)
 
-                    # Draw lines from origin to intersection points and from there to the clicked point
+                    # Draw lines from origin to intersection points and from there to the target point
                     draw_lines(intersect_x1, intersect_y1, target_x, target_y)
                     draw_lines(intersect_x2, intersect_y2, target_x, target_y)
 
                     # Calculate and display angles between lines
-                    angle_origin_to_intersect_1, relative_angle_1 = find_angles(intersect_x1, intersect_y1, target_x, target_y)
-                    angle_origin_to_intersect_2, relative_angle_2 = find_angles(intersect_x2, intersect_y2, target_x, target_y)
+                    angle_1[0], angle_2[0] = find_angles(intersect_x1, intersect_y1, target_x, target_y)
+                    angle_1[1], angle_2[1] = find_angles(intersect_x2, intersect_y2, target_x, target_y)
 
-                    # Output to console
-                    print (angle_origin_to_intersect_1, relative_angle_1)
-                    print (angle_origin_to_intersect_2, relative_angle_2)
+                    # Calculate the absolute differences from 90 degrees
+                    diff_1 = abs(angle_1[0] - 90) + abs(angle_2[0] - 90)
+                    diff_2 = abs(angle_1[1] - 90) + abs(angle_2[1] - 90)
+
+                    # Select and exclude the pair of value less close to 90
+                    if diff_1 > diff_2:
+                        selected_angle_origin_to_intersect = angle_1[0]
+                        selected_angle_to_target_relative = angle_2[0]
+                    else:
+                        selected_angle_origin_to_intersect = angle_1[1]
+                        selected_angle_to_target_relative = angle_2[1]
+
+                    # Print the selected pair
+                    print("Angle 1:", selected_angle_origin_to_intersect)
+                    print("Angle 2:", selected_angle_to_target_relative)
                     print()
-                    
+
     # Update the display
     pygame.display.flip()
 
