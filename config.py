@@ -12,7 +12,7 @@ arm_1_length = 94
 arm_2_length = 104
 
 # MQTT broker details
-broker_ip = "192.168.1.125"
+broker_ip = "<your-ip-address>"
 topic = "roboarm"
-username = "mqtt"
-password = "maxmil"
+username = "<your-username>"
+password = "<your-password>"
