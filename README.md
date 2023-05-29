@@ -40,7 +40,7 @@ In this way, the ArmController script is able to move the robot arm segments acc
 
 ## Next steps
 
-To use the Robot Arm system as a complement to the 'Tris with Computer Vision' project, I plan to:
+To use the Robot Arm system as a complement to the [Tris with Computer Vision](https://github.com/massimobottelli/tris-computer-vision) project, I plan to:
 
 1. add the possibility of raising and lowering the pen mounted on the 'hand' of the robotic arm
 
