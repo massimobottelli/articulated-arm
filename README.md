@@ -1,8 +1,8 @@
-# Robot arm
+# Robot Arm
 
 ![Robot Arm](public/img/capture-02.jpeg)
 
-This project (currently under development) aims to create software to control an articulated robotic arm.
+This project (still under development) aims to create software to control an articulated robotic arm.
 
 The project consists of two Python scripts:
 
@@ -37,3 +37,11 @@ When it receives the data, the script creates two threads to move the motors sim
 The movement of a servomotor requires low-level control: the script creates a PWM (Pulse Width Modulation) object with a frequency of 50 Hz, initially starts the PWM signal with a duty cycle of 0% (neutral position) and then loops from the start angle to the end angle by calculating the duty cycle to set the position of the servomotor.
 
 In this way, the ArmController script is able to move the robot arm segments according to user input to position the 'hand' where required.
+
+## Next steps
+
+To use the Robot Arm system as a complement to the 'Tris with Computer Vision' project, I plan to:
+
+1. add the possibility of raising and lowering the pen mounted on the 'hand' of the robotic arm
+
+2. create a library of coordinates to draw the "X" symbol in all possible positions on the game board
