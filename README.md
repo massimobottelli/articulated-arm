@@ -22,8 +22,18 @@ After that, given the coordinates of the three points ('shoulder', 'elbow' and '
 
 Of the two possible positions of the 'elbow', the script excludes the solution closest to the neutral position: due to limitations in the implementation of the robotic arm, movements at narrow angles are less accurate.
 
-Finally, the script sends the calculated angle pair to the controller of the robotic arm.
+Finally, the script sends the calculated angle pair to the controller of the robotic arm through a MQTT connection.
 
 ## ArmController
 
-The second script is the software that controls the movement of the robot: it receives commands from RoboLink and moves the segments of the robotic arm accordingly.
+The second script is the software that controls the movement of the robot: it receives commands from RoboLink user interface and moves the segments of the robotic arm accordingly.
+
+The script is intended to run on a Raspberry Pi to which the robotic arm is connected via GPIO ports.
+
+The script uses an MQTT connection to listen to a topic on which the RoboLink user interface publishes the angles for the movement of the motors mounted on the robot arm.
+
+When it receives the data, the script creates two threads to move the motors simultaneously at the desired angles.
+
+The movement of a servomotor requires low-level control: the script creates a PWM (Pulse Width Modulation) object with a frequency of 50 Hz, initially starts the PWM signal with a duty cycle of 0% (neutral position) and then loops from the start angle to the end angle by calculating the duty cycle to set the position of the servomotor.
+
+In this way, the ArmController script is able to move the robot arm segments according to user input to position the 'hand' where required.
