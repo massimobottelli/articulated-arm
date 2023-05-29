@@ -1,17 +1,29 @@
-# Robot Arm
+# Robot arm
 
 ![Robot Arm](public/img/capture-02.jpeg)
 
-This project (currently under development) aims at creating a software to control a robotic articulated arm.
+This project (currently under development) aims to create software to control an articulated robotic arm.
 
-The projects is composed by two Python scripts:
+The project consists of two Python scripts:
 
 ## RoboLink
 
-First script represents the interface between the user and the robot arm: it allow users to select the target point where the robot arm must move to, then calculates the angles for moving the two segments of the robot arm and finally sends the angles to the robot controller
+The first script is the interface between the user and the robotic arm: it allows the user to select the target point at which the robotic arm is to move, simply by pointing the mouse at a window representing the diagram of the robotic arm.
 
+The script then calculates the angles to move the two segments of the robotic arm, and finally sends the angles to the robot controller.
+
+The position of the 'shoulder' is fixed, the position of the 'hand' is selected by the user, and the lengths of the two segments 'shoulder' to 'elbow' and 'elbow' to 'hand' are known.
+
+The script relies on mathematical calculations to define the angles the two segments must form in order to point the hand where indicated by the user. 
+
+First, the position of the 'elbow' is calculated as the intersection of the two circles centred on the 'shoulder' and the 'hand'.
+
+After that, given the coordinates of the three points ('shoulder', 'elbow' and 'hand'), the script calculates the angles between the segments, i.e. the angles to be moved by the robotic arm's motors.
+
+Of the two possible positions of the 'elbow', the script excludes the solution closest to the neutral position: due to limitations in the implementation of the robotic arm, movements at narrow angles are less accurate.
+
+Finally, the script sends the calculated angle pair to the controller of the robotic arm.
 
 ## ArmController
 
-Second script actually is the piece of software that controls the robot movement: it receives the commands from RoboLink and moves the segments of the robot arm accordingly.
-
+The second script is the software that controls the movement of the robot: it receives commands from RoboLink and moves the segments of the robotic arm accordingly.
