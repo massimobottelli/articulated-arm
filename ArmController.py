@@ -93,11 +93,8 @@ def on_message(client, userdata, msg):
         map(int, msg.payload.decode().split(","))
 
     # Move motors to received angles
-    motor_1_start_angle = start_angle_1
-    motor_2_start_angle = start_angle_2
-
-    motor_1_end_angle = 180 - end_angle_1
-    motor_2_end_angle = 180 - end_angle_2
+    end_angle_1 = 180 - end_angle_1
+    end_angle_2 = 180 - end_angle_2
 
     # Validate the pen position flag
     if pen_position_flag == 0:
@@ -109,16 +106,7 @@ def on_message(client, userdata, msg):
         sys.exit(1)
 
     # Move to target position
-    move_arm(motor_1_start_angle, motor_2_start_angle, motor_1_end_angle, motor_2_end_angle, pen_position)
-
-    # Revert pen position
-    if pen_position_flag == 0:
-        pen_position = DOWN
-    else:
-        pen_position = UP
-
-    # Return to neutral position
-    move_arm(motor_1_end_angle, motor_2_end_angle, motor_1_start_angle, motor_2_start_angle, pen_position)
+    move_arm(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position)
 
     GPIO.cleanup()
 

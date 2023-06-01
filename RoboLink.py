@@ -20,6 +20,19 @@ topic = config.topic
 username = config.username
 password = config.password
 
+# Constants for drawing X symbol on board
+
+# Parking position
+xp = 350
+yp = 120
+
+# Top-left corner of board
+x0 = 205
+y0 = 110
+
+# Size of cell
+dx = 30
+dy = 30
 
 def draw_grid():
     square_size = (board_height - 2 * vertical_margin) // grid_rows
@@ -154,6 +167,57 @@ def publish_mqtt(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_pos
         return False
 
 
+def calc_move_coords(row, col):
+    # Create tuple of coordinates to draw X in given cell
+
+    # Initialize arrays
+    x1 = []
+    y1 = []
+    x2 = []
+    y2 = []
+    p = []
+
+    # Coordinates for arm move #1
+    x1.append(xp)
+    y1.append(yp)
+    x2.append(x0 + row  * dx)
+    y2.append(y0 + col * dx)
+    p.append(0)
+
+    # Coordinates for arm move #2
+    x1.append(x0 + row * dx)
+    y1.append(y0 + col * dx)
+    x2.append(x0 + (row + 1) * dx)
+    y2.append(y0 + (col + 1) * dy)
+    p.append(1)
+
+    # Coordinates for arm move #3
+    x1.append(x0 + (row + 1) * dx)
+    y1.append(y0 + (col + 1) * dy)
+    x2.append(x0 + (row + 1) * dx)
+    y2.append(y0 + col * dy)
+    p.append(0)
+
+    # Coordinates for arm move #4
+    x1.append(x0 + (row + 1) * dx)
+    y1.append(y0 + col * dy)
+    x2.append(x0 + row * dx)
+    y2.append(y0 + (col + 1) * dy)
+    p.append(1)
+
+    # Coordinates for arm move #5
+    x1.append(x0 + row * dx)
+    y1.append(y0 + (col + 1) * dy)
+    x2.append(xp)
+    y2.append(yp)
+    p.append(0)
+
+    # Create tuple of moves
+    moves = (x1, y1, x2, y2, p)
+
+    return moves
+
+
 # Initialize Pygame
 pygame.init()
 board = pygame.display.set_mode((board_width, board_height))
@@ -222,9 +286,8 @@ while running:
 
                     # Publish data over MQTT
                     if final_angle_1 > 0:
-                        publish_mqtt(180, 180, final_angle_1, final_angle_2, 0)
-                        publish_mqtt(final_angle_1, final_angle_2, 180, 180, 1)
-                        print("MQTT:", final_angle_1, final_angle_2)
+                        publish_mqtt(90, 90, final_angle_1, final_angle_2, 0)
+                        publish_mqtt(180 - final_angle_1, 180 - final_angle_2, 90, 90, 1)
 
     # Update the display
     pygame.display.flip()
