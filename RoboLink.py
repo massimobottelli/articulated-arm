@@ -6,6 +6,11 @@ import config
 # Access the constants from the config module
 board_width = config.board_width
 board_height = config.board_height
+vertical_margin = config.vertical_margin
+vertical_offset = config.vertical_offset
+grid_rows = config.grid_rows
+grid_cols = config.grid_cols
+
 origin_x = config.origin_x
 origin_y = config.origin_y
 arm_1_length = config.arm_1_length
@@ -16,9 +21,25 @@ username = config.username
 password = config.password
 
 
+def draw_grid():
+    square_size = (board_height - 2 * vertical_margin) // grid_rows
+    horizontal_margin = (board_width - square_size * grid_cols) // 2
+
+    # Draw the grid
+    for row in range(grid_rows):
+        for col in range(grid_cols):
+            # Calculate the position of the current grid square
+            x = horizontal_margin + col * square_size
+            y = vertical_offset + vertical_margin + row * square_size
+
+            # Draw the grid square
+            pygame.draw.rect(board, (200, 200, 200), (x, y, square_size + 1, square_size + 1), 1)
+
+
 def draw_origin():
     board.fill((255, 255, 255))  # Clear the board
 
+    draw_grid()
     # Draw the origin (initial point) on the board
     pygame.draw.circle(board, (255, 0, 0), (origin_x, origin_y), 3)
     # Draw a circle centered on the origin with a radius of arm_1_length
@@ -116,13 +137,14 @@ def select_angles(angle1, angle2):
     return selected_angle_1, selected_angle_2, selected_intersect_x, selected_intersect_y
 
 
-def publish_mqtt(angle1, angle2, pen):
+def publish_mqtt(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position_flag):
     try:
         # Publish data over MQTT
         client = mqtt.Client()
         client.username_pw_set(username, password)
         client.connect(broker_ip)
-        message = str(angle1) + "," + str(angle2) + "," + str(pen)
+        message = str(start_angle_1) + "," + str(start_angle_2) + "," + str(end_angle_1) + "," + \
+                  str(end_angle_2) + "," + str(pen_position_flag)
         client.publish(topic, message)
         client.disconnect()
         return True
@@ -198,12 +220,11 @@ while running:
                     # Print the selected pair
                     print("Angles:", final_angle_1, final_angle_2)
 
-                    # Pen position
-                    pen_position_flag = 1 # <-- to be updated
-
                     # Publish data over MQTT
                     if final_angle_1 > 0:
-                        publish_mqtt(final_angle_1, final_angle_2, pen_position_flag)
+                        publish_mqtt(180, 180, final_angle_1, final_angle_2, 0)
+                        publish_mqtt(final_angle_1, final_angle_2, 180, 180, 1)
+                        print("MQTT:", final_angle_1, final_angle_2)
 
     # Update the display
     pygame.display.flip()

@@ -80,64 +80,55 @@ def move_arm(start_1, start_2, end_1, end_2, pen_status):
     time.sleep(0.5)
 
 
-# Main
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT broker")
+        client.subscribe(topic)
+    else:
+        print("Connection failed. RC:", rc)
 
+
+def on_message(client, userdata, msg):
+    start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position_flag = \
+        map(int, msg.payload.decode().split(","))
+
+    # Move motors to received angles
+    motor_1_start_angle = start_angle_1
+    motor_2_start_angle = start_angle_2
+
+    motor_1_end_angle = 180 - end_angle_1
+    motor_2_end_angle = 180 - end_angle_2
+
+    # Validate the pen position flag
+    if pen_position_flag == 0:
+        pen_position = UP
+    elif pen_position_flag == 1:
+        pen_position = DOWN
+    else:
+        print("Error: Invalid pen position flag.")
+        sys.exit(1)
+
+    # Move to target position
+    move_arm(motor_1_start_angle, motor_2_start_angle, motor_1_end_angle, motor_2_end_angle, pen_position)
+
+    # Revert pen position
+    if pen_position_flag == 0:
+        pen_position = DOWN
+    else:
+        pen_position = UP
+
+    # Return to neutral position
+    move_arm(motor_1_end_angle, motor_2_end_angle, motor_1_start_angle, motor_2_start_angle, pen_position)
+
+    GPIO.cleanup()
+
+
+# Main
 if __name__ == '__main__':
     # Receive the angles via MQTT listener
-
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to MQTT broker")
-            client.subscribe(topic)
-        else:
-            print("Connection failed. RC:", rc)
-
-
-    def on_message(client, userdata, msg):
-        angle1, angle2, pen_position_flag = map(int, msg.payload.decode().split(","))
-        print("Angles:", angle1, angle2)
-        print("Pen:", pen_position_flag)
-
-        # Move motors to received angles
-        motor_1_start_angle = 90
-        motor_2_start_angle = 90
-
-        motor_1_end_angle = 180 - angle1
-        motor_2_end_angle = 180 - angle2
-
-        # Validate the pen position flag
-        if pen_position_flag == 0:
-            pen_position = UP
-        elif pen_position_flag == 1:
-            pen_position = DOWN
-        else:
-            print("Error: Invalid pen position flag.")
-            sys.exit(1)
-
-        # Move to target position
-        move_arm(motor_1_start_angle, motor_2_start_angle, motor_1_end_angle, motor_2_end_angle, pen_position)
-
-        # Revert pen position
-        if pen_position_flag == 0:
-            pen_position = DOWN
-        else:
-            pen_position = UP
-
-        # Return to neutral position
-        move_arm(motor_1_end_angle, motor_2_end_angle, motor_1_start_angle, motor_2_start_angle, pen_position)
-
-        GPIO.cleanup()
-
-
-    # ------------------------------
-
     client = mqtt.Client()
     client.username_pw_set(username, password)
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(broker_ip)
     client.loop_forever()
-
-    # ------------------------------
-
-
