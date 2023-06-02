@@ -25,6 +25,8 @@ password = config.password
 # Parking position
 xp = 350
 yp = 120
+start_angle_1 = 180
+start_angle_2 = 0
 
 # Top-left corner of board
 x0 = 205
@@ -286,8 +288,10 @@ while running:
 
                     # Publish data over MQTT
                     if final_angle_1 > 0:
-                        publish_mqtt(90, 90, final_angle_1, final_angle_2, 0)
-                        publish_mqtt(180 - final_angle_1, 180 - final_angle_2, 90, 90, 1)
+                        publish_mqtt(start_angle_1, start_angle_2, 180 - final_angle_1, 180 - final_angle_2, 0)
+                        # publish_mqtt(180 - final_angle_1, 180 - final_angle_2, 180, 0, 1)
+                        start_angle_1 = 180 - final_angle_1
+                        start_angle_2 = 180 - final_angle_2
 
     # Update the display
     pygame.display.flip()
