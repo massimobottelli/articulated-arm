@@ -16,8 +16,8 @@ x0 = 205
 y0 = 110
 
 # Size of cell
-dx = 30
-dy = 30
+dx = 20
+dy = 20
 
 def calc_move_coords(row, col):
     # Create tuple of coordinates to draw X in given cell
@@ -71,19 +71,16 @@ def calc_move_coords(row, col):
 
 
 # Main
-row = 2
-col = 0
-
+row = 3
+col = 3
 
 moves = calc_move_coords(row, col)
-
-for i in range(len(moves[0])):
-    elements = [t[i] for t in moves]
-    print(i + 1, elements)
 
 # Iterate over tuples
 for i in range(len(moves[0])):
     x1, y1, x2, y2, pen = [moves[j][i] for j in range(len(moves))]
+
+    print (x1, y1, x2, y2, pen)
 
     # Draw line
     if pen == 1:
