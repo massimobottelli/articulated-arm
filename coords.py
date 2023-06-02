@@ -69,35 +69,40 @@ def calc_move_coords(row, col):
 
     return moves
 
-
 # Main
-row = 3
-col = 3
-
-moves = calc_move_coords(row, col)
-
-# Iterate over tuples
-for i in range(len(moves[0])):
-    x1, y1, x2, y2, pen = [moves[j][i] for j in range(len(moves))]
-
-    print (x1, y1, x2, y2, pen)
-
-    # Draw line
-    if pen == 1:
-        pygame.draw.line(board, (0, 0, 0), (x1, y1), (x2, y2), 2)
-
-    # Call function to translate coordinates to angles
-    # <function here>
-
-# Update the display
-pygame.display.flip()
 
 # Main loop
+for row in range(3):
+    for col in range(3):
+
+        print()
+        print(row, col)
+
+        # Calculate sequence of coordinates for each cell
+        moves = calc_move_coords(row, col)
+
+        # Iterate over sequence
+        for i in range(len(moves[0])):
+            x1, y1, x2, y2, pen = [moves[j][i] for j in range(len(moves))]
+
+            print(x1, y1, x2, y2, pen)
+
+            # Draw line
+            if pen == 1:
+                pygame.draw.line(board, (0, 0, 0), (x1, y1), (x2, y2), 2)
+
+            # Call function to translate coordinates to angles
+            # <function here>
+
+            # Update display
+            pygame.display.flip()
+
 running = True
 while running:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                running = False
 
 # Quit Pygame
 pygame.quit()
