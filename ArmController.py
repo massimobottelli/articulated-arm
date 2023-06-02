@@ -36,7 +36,7 @@ def move_servo(motor_pin, start_angle, end_angle, res):
     # Loop from start_angle to end_angle
     for angle in range(start_angle, end_angle + step, step):
         goto_angle(servo_pwm, angle)
-        time.sleep(0.05)
+        time.sleep(0.1)
 
         # Clean up GPIO
     servo_pwm.stop()
@@ -54,7 +54,8 @@ def pen(direction):
     motor_pin = MOTOR_3
     start_angle = direction[0]
     end_angle = direction[1]
-    move_servo(motor_pin, start_angle, end_angle, 10)
+    resolution = 10
+    move_servo(motor_pin, start_angle, end_angle, resolution)
 
 
 def move_arm(start_1, start_2, end_1, end_2, pen_status):
@@ -83,6 +84,7 @@ def move_arm(start_1, start_2, end_1, end_2, pen_status):
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT broker")
+        print("Listening...")
         client.subscribe(topic)
     else:
         print("Connection failed. RC:", rc)
@@ -91,10 +93,6 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position_flag = \
         map(int, msg.payload.decode().split(","))
-
-    # Move motors to received angles
-    end_angle_1 = 180 - end_angle_1
-    end_angle_2 = 180 - end_angle_2
 
     # Validate the pen position flag
     if pen_position_flag == 0:
@@ -108,6 +106,10 @@ def on_message(client, userdata, msg):
     # Move to target position
     move_arm(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position)
 
+    print("start angle 1:" + str(start_angle_1) + ", start_angle_2: " + str(start_angle_2))
+    print("end angle 1:" + str(end_angle_1) + ", end angle 2: " + str(end_angle_2))
+    print("Pen: " + str(pen_position))
+    print()
     GPIO.cleanup()
 
 

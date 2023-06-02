@@ -1,4 +1,6 @@
 import math
+import time
+
 import paho.mqtt.client as mqtt
 import config
 
@@ -14,7 +16,7 @@ password = config.password
 
 # Constants for drawing X symbol on board
 # Parking position
-xp = 350
+xp = 150
 yp = 120
 
 # Top-left corner of board
@@ -22,8 +24,8 @@ x0 = 205
 y0 = 110
 
 # Size of cell
-dx = 30
-dy = 30
+dx = 20
+dy = 20
 
 
 def find_intersection(x, y):
@@ -55,30 +57,14 @@ def calculate_angle(x1, y1, x2, y2):
     return math.degrees(math.atan2(delta_y, delta_x))
 
 
-def select_angles(angle1, angle2):
-    diff_1 = abs(angle1[0] - 90) + abs(angle2[0] - 90)
-    diff_2 = abs(angle1[1] - 90) + abs(angle2[1] - 90)
-    if diff_1 > diff_2:
-        selected_angle_1 = angle1[0]
-        selected_angle_2 = angle2[0]
-        selected_intersect_x = intersect_x1
-        selected_intersect_y = intersect_y1
-    else:
-        selected_angle_1 = angle1[1]
-        selected_angle_2 = angle2[1]
-        selected_intersect_x = intersect_x2
-        selected_intersect_y = intersect_y2
-    return selected_angle_1, selected_angle_2, selected_intersect_x, selected_intersect_y
-
-
 def position_to_angle(target_x, target_y):
     global distance, intersect_x1, intersect_y1, intersect_x2, intersect_y2
+
+    print ("target_x, target_y: " + str(target_x) + ", " + str(target_y))
 
     # Initialize variables
     angle_1 = [0, 0]
     angle_2 = [0, 0]
-    intersect_1 = [0, 0]
-    intersect_2 = [0, 0]
 
     # Find the position of elbow
     distance = ((target_x - origin_x) ** 2 + (target_y - origin_y) ** 2) ** 0.5
@@ -90,11 +76,13 @@ def position_to_angle(target_x, target_y):
         angle_1[0], angle_2[0] = find_angles(intersect_x1, intersect_y1, target_x, target_y)
         angle_1[1], angle_2[1] = find_angles(intersect_x2, intersect_y2, target_x, target_y)
 
-        # Select the pair of angles more distant to 90
-        final_angle_1, final_angle_2, selected_intercept_x, selected_intercept_y = \
-            select_angles(angle_1, angle_2)
+        angle_1 = angle_1[0]
+        angle_2 = angle_2[0]
 
-        return final_angle_1, final_angle_2
+        print ("angle_1, angle_2: "+ str(angle_1) + ", " + str(angle_2))
+        print()
+
+        return angle_1, angle_2
 
 
 def calc_move_coords(row, col):
@@ -110,7 +98,7 @@ def calc_move_coords(row, col):
     # Coordinates for arm move #1
     x1.append(xp)
     y1.append(yp)
-    x2.append(x0 + row  * dx)
+    x2.append(x0 + row * dx)
     y2.append(y0 + col * dx)
     p.append(0)
 
@@ -168,8 +156,8 @@ def publish_mqtt(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_pos
 # Main
 
 # Select cell to draw
-row = 1
-col = 1
+row = 0
+col = 0
 
 print("Row: " + str(row) + "; Col: " + str(col))
 
@@ -183,15 +171,18 @@ for i in range(len(moves[0])):
     # Calculate angles
     start_angle_1, start_angle_2 = position_to_angle(x1, y1)
     end_angle_1, end_angle_2 = position_to_angle(x2, y2)
-    end_angle_1 = 180 - end_angle_1
-    end_angle_2 = 180 - end_angle_2
+
+    end_angle_1 = end_angle_1
+    end_angle_2 = end_angle_2
 
     # Print coordinates and angles
-    print ("From " + str(x1) + "," + str(y1) + " -> Angles: " + str(start_angle_1) + "," + str(start_angle_2))
-    print ("To " + str(x2) +"," + str(y2) + " -> Angles: " + str(end_angle_1) + "," + str(end_angle_2))
-    print ("Pen: " + str(pen))
-    print ()
+    print("Step " + str(i+1))
+    print("From " + str(x1) + "," + str(y1) + " -> Angles: " + str(start_angle_1) + "," + str(start_angle_2))
+    print("To " + str(x2) + "," + str(y2) + " -> Angles: " + str(end_angle_1) + "," + str(end_angle_2))
+    print("Pen: " + str(pen))
+    print()
 
     # Publish data over MQTT
     publish_mqtt(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen)
 
+    time.sleep(1)
