@@ -235,6 +235,9 @@ pygame.display.flip()
 running = True
 while running:
 
+    mouse_pos = pygame.mouse.get_pos()
+    print(mouse_pos)
+
     # Initialize variables
     angle_1 = [0, 0]
     angle_2 = [0, 0]
@@ -288,7 +291,7 @@ while running:
 
                     # Publish data over MQTT
                     if final_angle_1 > 0:
-                        publish_mqtt(start_angle_1, start_angle_2, 180 - final_angle_1, 180 - final_angle_2, 0)
+                        publish_mqtt(start_angle_1, start_angle_2, 180 - final_angle_1, 180 - final_angle_2, 1)
                         # publish_mqtt(180 - final_angle_1, 180 - final_angle_2, 180, 0, 1)
                         start_angle_1 = 180 - final_angle_1
                         start_angle_2 = 180 - final_angle_2

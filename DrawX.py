@@ -24,8 +24,8 @@ x0 = 205
 y0 = 110
 
 # Size of cell
-dx = 20
-dy = 20
+dx = 30
+dy = 30
 
 
 def find_intersection(x, y):
@@ -98,7 +98,7 @@ def calc_move_coords(row, col):
     # Coordinates for arm move #1
     x1.append(xp)
     y1.append(yp)
-    x2.append(x0 + row * dx)
+    x2.append(x0 + row  * dx)
     y2.append(y0 + col * dx)
     p.append(0)
 
@@ -156,8 +156,8 @@ def publish_mqtt(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_pos
 # Main
 
 # Select cell to draw
-row = 0
-col = 0
+row = 1
+col = 1
 
 print("Row: " + str(row) + "; Col: " + str(col))
 

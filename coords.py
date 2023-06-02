@@ -16,8 +16,8 @@ x0 = 205
 y0 = 110
 
 # Size of cell
-dx = 20
-dy = 20
+dx = 30
+dy = 30
 
 def calc_move_coords(row, col):
     # Create tuple of coordinates to draw X in given cell
