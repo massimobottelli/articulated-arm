@@ -25,8 +25,8 @@ password = config.password
 # Parking position
 xp = 350
 yp = 120
-start_angle_1 = 180
-start_angle_2 = 0
+start_angle_1 = 90
+start_angle_2 = 90
 
 # Top-left corner of board
 x0 = 205
@@ -336,7 +336,7 @@ while running:
                     )
 
                     # Print the selected pair
-                    print("Angles:", final_angle_1, final_angle_2)
+                    print("Publish on MQTT angles:", final_angle_1, final_angle_2)
 
                     # Publish data over MQTT
                     if final_angle_1 > 0:
@@ -347,7 +347,6 @@ while running:
                             180 - final_angle_2,
                             1,
                         )
-                        # publish_mqtt(180 - final_angle_1, 180 - final_angle_2, 180, 0, 1)
                         start_angle_1 = 180 - final_angle_1
                         start_angle_2 = 180 - final_angle_2
 

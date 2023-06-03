@@ -91,9 +91,12 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position_flag = map(
-        int, msg.payload.decode().split(",")
-    )
+    start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position_flag = \
+        map(int, msg.payload.decode().split(","))
+
+    # Move motors to received angles
+    # end_angle_1 = 180 - end_angle_1
+    # end_angle_2 = 180 - end_angle_2
 
     # Validate the pen position flag
     if pen_position_flag == 0:
@@ -105,19 +108,13 @@ def on_message(client, userdata, msg):
         sys.exit(1)
 
     # Move to target position
+    print("Moving to angles:", end_angle_1, end_angle_2)
     move_arm(start_angle_1, start_angle_2, end_angle_1, end_angle_2, pen_position)
-
-    print(
-        "start angle 1:" + str(start_angle_1) + ", start_angle_2: " + str(start_angle_2)
-    )
-    print("end angle 1:" + str(end_angle_1) + ", end angle 2: " + str(end_angle_2))
-    print("Pen: " + str(pen_position))
-    print()
     GPIO.cleanup()
 
 
 # Main
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Receive the angles via MQTT listener
     client = mqtt.Client()
     client.username_pw_set(username, password)
