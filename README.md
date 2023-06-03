@@ -4,6 +4,9 @@
 
 This project (still under development) aims to create software to control an articulated robotic arm.
 
+Video on https://youtu.be/hezybsFjkQo
+
+
 The project consists of two Python scripts:
 
 ## RoboLink
