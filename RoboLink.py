@@ -242,7 +242,7 @@ def calc_move_coords(row, col):
 # Initialize Pygame
 pygame.init()
 board = pygame.display.set_mode((board_width, board_height))
-pygame.display.set_caption("Robotic Arm Simulation")
+pygame.display.set_caption("Robolink")
 board.fill((255, 255, 255))  # Fill the board with white
 font = pygame.font.Font(None, 20)
 
